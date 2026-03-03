@@ -15,7 +15,10 @@ iPhone screenshots from social media thumbnails in seconds. Native SwiftUI app f
 - **Background** - 6 gradient presets, solid color, or custom gradient with angle control
 - **iPhone Corner Radius** - Matches the real iPhone display curvature
 - **Screenshot Positioning** - Scale, X/Y offset sliders for precise placement
-- **One-Click Export** - Copy to clipboard or save as PNG
+- **Video → GIF** - Drag & drop screen recordings (MP4/MOV) to create animated GIF thumbnails
+- **Video Preview** - Inline looping video playback in the canvas
+- **GIF Settings** - Adjustable FPS (5-15) and max duration (1-10s)
+- **One-Click Export** - Copy to clipboard, save as PNG, or export as animated GIF
 - **iOS Support** - PhotosPicker integration and Share Sheet
 
 ## Requirements
@@ -41,6 +44,8 @@ cp -r ThumbnailMaker.app /Applications/
 
 ## Usage
 
+### Image Thumbnail
+
 1. Copy a screenshot on your iPhone (or any image to clipboard)
 2. Open Thumbnail Maker
 3. **Cmd+V** to paste (macOS) or tap the photo button (iOS)
@@ -48,6 +53,13 @@ cp -r ThumbnailMaker.app /Applications/
 5. Choose template style (Center or Full)
 6. Add title text, adjust position and styling
 7. **Copy to Clipboard** or **Export as PNG**
+
+### Animated GIF from Video
+
+1. Drag & drop a screen recording (MP4/MOV) onto the canvas
+2. Video plays inline as a preview — adjust template, text, and background as usual
+3. Tune GIF settings in the sidebar (FPS, max duration)
+4. Click **Export as GIF** — frames are rendered with your template applied
 
 ## Keyboard Shortcuts (macOS)
 
@@ -73,6 +85,7 @@ Sources/
 │   ├── Canvas/
 │   │   ├── ThumbnailCanvasView.swift  # Renders the thumbnail
 │   │   ├── CanvasPreviewView.swift    # Preview wrapper + drag/paste
+│   │   ├── VideoPlayerView.swift      # Looping AVPlayer for video preview
 │   │   └── DropZoneView.swift         # Empty state
 │   ├── Sidebar/
 │   │   ├── SidebarView.swift          # All controls container
@@ -86,7 +99,9 @@ Sources/
 └── Services/
     ├── ClipboardService.swift     # NSPasteboard / UIPasteboard
     ├── ImageRenderService.swift   # SwiftUI → image rendering
-    └── ExportService.swift        # PNG file export (macOS)
+    ├── ExportService.swift        # PNG file export (macOS)
+    ├── VideoFrameExtractor.swift  # AVFoundation frame extraction
+    └── GIFExportService.swift     # Animated GIF generation (ImageIO)
 ```
 
 ## iOS
