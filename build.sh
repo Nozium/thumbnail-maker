@@ -15,8 +15,10 @@ fi
 echo "Creating .app bundle..."
 APP_DIR="ThumbnailMaker.app/Contents"
 mkdir -p "$APP_DIR/MacOS"
+mkdir -p "$APP_DIR/Resources"
 
 cp "$BINARY" "$APP_DIR/MacOS/ThumbnailMaker"
+cp docs/AppIcon.icns "$APP_DIR/Resources/AppIcon.icns"
 
 cat > "$APP_DIR/Info.plist" << 'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -31,6 +33,8 @@ cat > "$APP_DIR/Info.plist" << 'PLIST'
     <string>Thumbnail Maker</string>
     <key>CFBundleDisplayName</key>
     <string>Thumbnail Maker</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
