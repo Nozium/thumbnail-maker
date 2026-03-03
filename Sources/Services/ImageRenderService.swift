@@ -3,6 +3,17 @@ import SwiftUI
 enum ImageRenderService {
     @MainActor
     static func render(project: ThumbnailProject) -> PlatformImage? {
+        guard let cgImage = renderCGImage(project: project) else { return nil }
+
+        #if os(macOS)
+        return NSImage(cgImage: cgImage, size: project.canvasSize)
+        #else
+        return UIImage(cgImage: cgImage)
+        #endif
+    }
+
+    @MainActor
+    static func renderCGImage(project: ThumbnailProject) -> CGImage? {
         let canvasSize = project.canvasSize
 
         let canvasView = ThumbnailCanvasView(project: project)
@@ -13,12 +24,6 @@ enum ImageRenderService {
         renderer.isOpaque = true
         renderer.proposedSize = ProposedViewSize(canvasSize)
 
-        guard let cgImage = renderer.cgImage else { return nil }
-
-        #if os(macOS)
-        return NSImage(cgImage: cgImage, size: canvasSize)
-        #else
-        return UIImage(cgImage: cgImage)
-        #endif
+        return renderer.cgImage
     }
 }

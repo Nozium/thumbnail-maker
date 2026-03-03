@@ -18,11 +18,23 @@ struct CanvasPreviewView: View {
                 HStack {
                     Spacer()
 
-                    if project.hasSourceImage {
-                        ThumbnailCanvasView(project: project)
-                            .frame(width: previewSize.width, height: previewSize.height)
-                            .clipShape(RoundedRectangle(cornerRadius: 4))
-                            .shadow(radius: 8)
+                    if project.hasSource {
+                        ZStack(alignment: .topTrailing) {
+                            ThumbnailCanvasView(project: project)
+                                .frame(width: previewSize.width, height: previewSize.height)
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                                .shadow(radius: 8)
+
+                            if project.isVideo {
+                                Label("Video", systemImage: "film")
+                                    .font(.caption2)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(.ultraThinMaterial)
+                                    .clipShape(Capsule())
+                                    .padding(8)
+                            }
+                        }
                     } else {
                         DropZoneView(isTargeted: isDropTargeted)
                             .frame(width: previewSize.width, height: previewSize.height)
@@ -34,7 +46,7 @@ struct CanvasPreviewView: View {
             }
         }
         #if os(macOS)
-        .onDrop(of: [.image], isTargeted: $isDropTargeted) { providers in
+        .onDrop(of: [.image, .movie], isTargeted: $isDropTargeted) { providers in
             handleDrop(providers)
         }
         .background(Color(nsColor: .windowBackgroundColor))
@@ -60,10 +72,36 @@ struct CanvasPreviewView: View {
     #if os(macOS)
     private func handleDrop(_ providers: [NSItemProvider]) -> Bool {
         guard let provider = providers.first else { return false }
+
+        // Try video first
+        if provider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
+            provider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { url, _ in
+                guard let url else { return }
+                // Copy to temp location (drop URLs are temporary)
+                let tempURL = FileManager.default.temporaryDirectory
+                    .appendingPathComponent(UUID().uuidString)
+                    .appendingPathExtension(url.pathExtension)
+                try? FileManager.default.copyItem(at: url, to: tempURL)
+
+                Task {
+                    let firstFrame = await VideoFrameExtractor.extractFirstFrame(from: tempURL)
+                    await MainActor.run {
+                        project.sourceVideoURL = tempURL
+                        if let firstFrame {
+                            project.sourceImage = NSImage(cgImage: firstFrame, size: .zero)
+                        }
+                    }
+                }
+            }
+            return true
+        }
+
+        // Fallback: image
         provider.loadDataRepresentation(forTypeIdentifier: UTType.image.identifier) { data, _ in
             if let data, let image = NSImage(data: data) {
                 DispatchQueue.main.async {
                     project.sourceImage = image
+                    project.sourceVideoURL = nil
                 }
             }
         }

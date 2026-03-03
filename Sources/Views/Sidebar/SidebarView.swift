@@ -41,6 +41,27 @@ struct SidebarView: View {
                 }
             }
 
+            if project.isVideo {
+                Divider()
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("GIF Settings").font(.headline)
+                    HStack {
+                        Text("FPS")
+                        Slider(value: $project.gifFPS, in: 5...15, step: 1)
+                        Text("\(Int(project.gifFPS))")
+                            .monospacedDigit()
+                            .frame(width: 24)
+                    }
+                    HStack {
+                        Text("Duration")
+                        Slider(value: $project.gifMaxDuration, in: 1...10, step: 0.5)
+                        Text("\(project.gifMaxDuration, specifier: "%.1f")s")
+                            .monospacedDigit()
+                            .frame(width: 36)
+                    }
+                }
+            }
+
             Divider()
             ExportControls(project: project)
 

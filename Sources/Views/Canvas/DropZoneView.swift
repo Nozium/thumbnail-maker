@@ -15,7 +15,7 @@ struct DropZoneView: View {
                         .font(.system(size: 48))
                         .foregroundStyle(.secondary)
                     #if os(macOS)
-                    Text("Paste screenshot (Cmd+V)\nor drag & drop image here")
+                    Text("Paste image (Cmd+V)\nor drag & drop image/video")
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)
                     #else

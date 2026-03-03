@@ -45,11 +45,12 @@ struct ThumbnailMakerApp: App {
             case "v":
                 if let image = ClipboardService.shared.readImage() {
                     project.sourceImage = image
+                    project.sourceVideoURL = nil
                     return nil
                 }
                 return event
             case "c":
-                if project.hasSourceImage,
+                if project.hasSource,
                    let image = ImageRenderService.render(project: project) {
                     ClipboardService.shared.writeImage(image)
                     return nil

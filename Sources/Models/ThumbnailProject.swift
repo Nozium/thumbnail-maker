@@ -17,6 +17,12 @@ final class ThumbnailProject {
     var screenshotHorizontalOffset: CGFloat = 0
     var screenshotVerticalOffset: CGFloat = 0
 
+    // Video / GIF
+    var sourceVideoURL: URL? = nil
+    var gifFPS: Double = 10
+    var gifMaxDuration: Double = 5
+
     var canvasSize: CGSize { platform.canvasSize }
-    var hasSourceImage: Bool { sourceImage != nil }
+    var hasSource: Bool { sourceImage != nil || sourceVideoURL != nil }
+    var isVideo: Bool { sourceVideoURL != nil }
 }

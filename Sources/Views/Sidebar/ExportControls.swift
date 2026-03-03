@@ -3,6 +3,8 @@ import SwiftUI
 struct ExportControls: View {
     var project: ThumbnailProject
     @State private var showCopySuccess = false
+    @State private var isExportingGIF = false
+    @State private var gifProgress: String = ""
     #if os(iOS)
     @State private var showShareSheet = false
     @State private var shareImage: UIImage?
@@ -19,7 +21,7 @@ struct ExportControls: View {
             }
             .controlSize(.large)
             .buttonStyle(.borderedProminent)
-            .disabled(!project.hasSourceImage)
+            .disabled(!project.hasSource)
 
             #if os(macOS)
             Button(action: exportAsPNG) {
@@ -31,7 +33,27 @@ struct ExportControls: View {
             }
             .controlSize(.large)
             .buttonStyle(.bordered)
-            .disabled(!project.hasSourceImage)
+            .disabled(!project.hasSource)
+
+            if project.isVideo {
+                Button(action: exportAsGIF) {
+                    HStack {
+                        if isExportingGIF {
+                            ProgressView()
+                                .controlSize(.small)
+                            Text(gifProgress)
+                        } else {
+                            Image(systemName: "film")
+                            Text("Export as GIF")
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .controlSize(.large)
+                .buttonStyle(.bordered)
+                .tint(.orange)
+                .disabled(isExportingGIF)
+            }
             #else
             Button(action: shareAction) {
                 HStack {
@@ -42,7 +64,7 @@ struct ExportControls: View {
             }
             .controlSize(.large)
             .buttonStyle(.bordered)
-            .disabled(!project.hasSourceImage)
+            .disabled(!project.hasSource)
             .sheet(isPresented: $showShareSheet) {
                 if let image = shareImage {
                     ShareSheet(items: [image])
@@ -66,6 +88,18 @@ struct ExportControls: View {
         guard let image = ImageRenderService.render(project: project) else { return }
         let name = "thumbnail-\(project.platform.rawValue.lowercased())"
         ExportService.savePNG(image: image, suggestedName: name)
+    }
+
+    private func exportAsGIF() {
+        isExportingGIF = true
+        gifProgress = "Preparing..."
+        Task {
+            await GIFExportService.exportGIF(project: project) { progress in
+                gifProgress = "Frame \(progress.current)/\(progress.total)"
+            }
+            isExportingGIF = false
+            gifProgress = ""
+        }
     }
     #else
     private func shareAction() {
