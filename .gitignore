@@ -1,0 +1,7 @@
+.build/
+.swiftpm/
+ThumbnailMaker.app/
+*.xcodeproj/
+xcuserdata/
+DerivedData/
+.DS_Store
