@@ -90,44 +90,52 @@ struct ThumbnailCanvasView: View {
         }
     }
 
-    // MARK: - Text
+    // MARK: - Text (9-position grid)
 
     @ViewBuilder
     private func textLayer(scale: CGFloat) -> some View {
         let config = project.textConfig
+        let pos = config.titlePosition
+        let pad = 20 * scale
 
-        VStack(spacing: 8 * scale) {
-            if config.titlePosition == .top {
-                Spacer().frame(height: 20 * scale)
-            }
-            if config.titlePosition == .bottom {
+        VStack(spacing: 0) {
+            if pos.verticalZone == .center || pos.verticalZone == .bottom {
                 Spacer()
             }
 
-            if !config.title.isEmpty {
-                Text(config.title)
-                    .font(.system(size: config.titleFontSize * scale, weight: .bold))
-                    .foregroundStyle(config.titleColor)
-                    .multilineTextAlignment(.center)
-                    .shadow(color: .black.opacity(0.5), radius: 2 * scale)
+            HStack(spacing: 0) {
+                if pos.horizontalZone == .center || pos.horizontalZone == .trailing {
+                    Spacer()
+                }
+
+                VStack(alignment: pos.horizontalAlignment, spacing: 8 * scale) {
+                    if !config.title.isEmpty {
+                        Text(config.title)
+                            .font(.system(size: config.titleFontSize * scale, weight: .bold))
+                            .foregroundStyle(config.titleColor)
+                            .multilineTextAlignment(pos.textAlignment)
+                            .shadow(color: .black.opacity(0.5), radius: 2 * scale)
+                    }
+
+                    if config.showSubtitle && !config.subtitle.isEmpty {
+                        Text(config.subtitle)
+                            .font(.system(size: config.subtitleFontSize * scale, weight: .medium))
+                            .foregroundStyle(config.subtitleColor)
+                            .multilineTextAlignment(pos.textAlignment)
+                            .shadow(color: .black.opacity(0.3), radius: 1 * scale)
+                    }
+                }
+
+                if pos.horizontalZone == .leading || pos.horizontalZone == .center {
+                    Spacer()
+                }
             }
 
-            if config.showSubtitle && !config.subtitle.isEmpty {
-                Text(config.subtitle)
-                    .font(.system(size: config.subtitleFontSize * scale, weight: .medium))
-                    .foregroundStyle(config.subtitleColor)
-                    .multilineTextAlignment(.center)
-                    .shadow(color: .black.opacity(0.3), radius: 1 * scale)
-            }
-
-            if config.titlePosition == .top {
+            if pos.verticalZone == .top || pos.verticalZone == .center {
                 Spacer()
-            }
-            if config.titlePosition == .bottom {
-                Spacer().frame(height: 20 * scale)
             }
         }
-        .padding(20 * scale)
+        .padding(pad)
     }
 
     // MARK: - Helpers

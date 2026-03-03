@@ -26,11 +26,74 @@ struct TextControls: View {
 
             ColorPicker("Color", selection: $config.titleColor)
 
-            Picker("Position", selection: $config.titlePosition) {
-                ForEach(TextPosition.allCases) { pos in
-                    Text(pos.rawValue).tag(pos)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Position")
+                TextPositionGrid(selection: $config.titlePosition)
+            }
+        }
+    }
+}
+
+// MARK: - 3x3 Position Grid
+
+struct TextPositionGrid: View {
+    @Binding var selection: TextPosition
+
+    private let rows: [[TextPosition]] = [
+        [.topLeft, .topCenter, .topRight],
+        [.centerLeft, .center, .centerRight],
+        [.bottomLeft, .bottomCenter, .bottomRight]
+    ]
+
+    var body: some View {
+        Grid(horizontalSpacing: 4, verticalSpacing: 4) {
+            ForEach(rows, id: \.first) { row in
+                GridRow {
+                    ForEach(row) { pos in
+                        Button {
+                            selection = pos
+                        } label: {
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(selection == pos ? Color.accentColor : Color.secondary.opacity(0.2))
+                                .frame(width: 28, height: 20)
+                                .overlay {
+                                    positionIcon(pos)
+                                        .foregroundStyle(selection == pos ? .white : .secondary)
+                                }
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func positionIcon(_ pos: TextPosition) -> some View {
+        let h = pos.horizontalZone
+        let v = pos.verticalZone
+
+        GeometryReader { geo in
+            let w: CGFloat = 10
+            let barH: CGFloat = 2
+            let x: CGFloat = {
+                switch h {
+                case .leading: return 3
+                case .center: return (geo.size.width - w) / 2
+                case .trailing: return geo.size.width - w - 3
+                }
+            }()
+            let y: CGFloat = {
+                switch v {
+                case .top: return 4
+                case .center: return (geo.size.height - barH) / 2
+                case .bottom: return geo.size.height - barH - 4
+                }
+            }()
+
+            RoundedRectangle(cornerRadius: 1)
+                .frame(width: w, height: barH)
+                .offset(x: x, y: y)
         }
     }
 }
